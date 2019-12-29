@@ -1,13 +1,26 @@
 require('dotenv').config();
 
-module.exports = {
+const withCss = require('@zeit/next-css');
+const withSass = require('@zeit/next-sass');
+const withPlugins = require('next-compose-plugins');
+
+const nextConfiguration = {
   env: {
     MONGODB_URI: process.env.MONGODB_URI,
-    CLOUDINARY_URL: process.env.CLOUDINARY_URL,
-    DB_NAME: process.env.DB_NAME,
-    WEB_URI: process.env.WEB_URI,
-    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
-    SENDGRID_TEMPLATEID_EMAILVERIFY: process.env.SENDGRID_TEMPLATEID_EMAILVERIFY,
-    EMAIL_FROM: process.env.EMAIL_FROM,
+    DB_NAME: process.env.DB_NAME
   },
+  cssLoaderOptions: {
+    importLoaders: 1
+  },
+  webpack: (config, { defaultLoaders }) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      // Transform all direct `react-native` imports to `react-native-web`
+      'react-native$': 'react-native-web'
+    };
+    config.resolve.extensions.push('.web.js', '.web.ts', '.web.tsx');
+    return config;
+  }
 };
+
+module.exports = withPlugins([withCss, withSass], nextConfiguration);
